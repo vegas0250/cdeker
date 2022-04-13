@@ -1,0 +1,22 @@
+{
+    "name": "vegas0250/cdeker",
+    "description": "API client for cdek",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Vegas0250\\Cdeker\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "vegas0250",
+            "email": "vegas0250@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "7.0",
+        "symfony/cache": "^5.4",
+        "ext-json": "*"
+    }
+}

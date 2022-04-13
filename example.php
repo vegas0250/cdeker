@@ -1,0 +1,36 @@
+<?php
+
+use Vegas0250\Cdeker\Client;
+
+$loader = require __DIR__ . '/vendor/autoload.php';
+
+$cdekerClient = new Client('EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI', 'PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG', true);
+
+#print_r($cdekerClient->getToken());
+
+/*
+$result = $cdekerClient->request('get', '/v2/deliverypoints', [
+    'city_code' => 250
+]);
+*/
+
+/*
+$result = $cdekerClient->request('get', '/v2/location/cities');
+*/
+
+/*
+$result = $cdekerClient->request('post', '/v2/calculator/tarifflist', [
+    'from_location' => [
+        'code' => 248
+    ],
+    'to_location' => [
+        'code' => 250
+    ],
+    'packages' => [
+        'weight' => 5000
+    ]
+]);
+*/
+
+
+#print_r($result);
