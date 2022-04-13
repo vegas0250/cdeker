@@ -14,6 +14,11 @@ class Client
     private $clientId;
     private $clientSecret;
 
+    /**
+     * @param string $clientId - Это "Account" из документации
+     * @param string $clientSecret - Это "Secure password" из документации
+     * @param boolean $test - Выполнение в тестовой среде, подробнее в документации
+     */
     public function __construct($clientId, $clientSecret, $isTest = false) {
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
@@ -49,6 +54,17 @@ class Client
         });
     }
 
+    /**
+     * @param string $method -  Операясь на документацию находим необходимый
+     *                          запрос, например "Список офисов", в описании
+     *                          запроса указано GET или POST, в нашем случае
+     *                          GET, на данный момент необходимо писать в
+     *                          нижнем регистре "get".
+     * @param string $url    -  Уникальный адрес запроса, в случае со
+     *                          "Списком офисов" получится "/v2/deliverypoints"
+     * @param array $params -   Список передаваемых параметров, в виде
+     *                          ассоциативного массива.
+     */
     public function request($method, $url, $params = []) {
         $token = $this->getToken();
 
