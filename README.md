@@ -19,7 +19,7 @@
 
 Будет доступно после публикации в репозиториях composer.
 ```console
-composer require *
+composer require vegas0250/cdeker
 ```
 
 ## Использование
