@@ -10,6 +10,7 @@ class Client
     const BASE_TEST_URL = 'https://api.edu.cdek.ru';
 
     private $httpClient;
+    private $isTest = false;
 
     private $clientId;
     private $clientSecret;
@@ -23,8 +24,10 @@ class Client
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
 
+        $this->isTest = $isTest;
+
         $this->httpClient = new \GuzzleHttp\Client([
-            'base_uri' => $isTest ? self::BASE_TEST_URL : self::BASE_URL,
+            'base_uri' => $this->isTest ? self::BASE_TEST_URL : self::BASE_URL,
             'defaults' => [
                 'headers' => [
                     'content-type' => 'application/json'
@@ -37,7 +40,7 @@ class Client
         $fileCache = new FilesystemAdapter('cdeker');
 
         return $fileCache->get('token', function(ItemInterface $item) {
-            $rawResponse = $this->httpClient->request('post',self::BASE_URL.'/v2/oauth/token', [
+            $rawResponse = $this->httpClient->request('post',$this->isTest ? self::BASE_TEST_URL.'/v2/oauth/token' : self::BASE_URL.'/v2/oauth/token', [
                 'form_params' => [
                     'grant_type' => 'client_credentials',
                     'client_id' => $this->clientId,
@@ -68,7 +71,7 @@ class Client
     public function request($method, $url, $params = []) {
         $token = $this->getToken();
 
-        $rowResponse = $this->httpClient->request($method, self::BASE_URL.$url, [
+        $rowResponse = $this->httpClient->request($method, $this->isTest ? self::BASE_TEST_URL.$url : self::BASE_URL.$url, [
             'headers' => [
                 'Authorization' => 'Bearer '.$token,
             ],
