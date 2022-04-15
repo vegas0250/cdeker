@@ -18,12 +18,11 @@ class Client
     /**
      * @param string $clientId - Это "Account" из документации
      * @param string $clientSecret - Это "Secure password" из документации
-     * @param boolean $test - Выполнение в тестовой среде, подробнее в документации
+     * @param boolean $isTest - Выполнение в тестовой среде, подробнее в документации
      */
     public function __construct($clientId, $clientSecret, $isTest = false) {
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
-
         $this->isTest = $isTest;
 
         $this->httpClient = new \GuzzleHttp\Client([
@@ -39,8 +38,10 @@ class Client
     public function getToken() {
         $fileCache = new FilesystemAdapter('cdeker');
 
-        return $fileCache->get('token', function(ItemInterface $item) {
-            $rawResponse = $this->httpClient->request('post',$this->isTest ? self::BASE_TEST_URL.'/v2/oauth/token' : self::BASE_URL.'/v2/oauth/token', [
+        $tokenKey = $this->isTest ? 'token-test' : 'token';
+
+        $token = $fileCache->get($tokenKey, function(ItemInterface $item) {
+            $rawResponse = $this->httpClient->request('post','/v2/oauth/token', [
                 'form_params' => [
                     'grant_type' => 'client_credentials',
                     'client_id' => $this->clientId,
@@ -55,6 +56,10 @@ class Client
 
             return $response['access_token'];
         });
+
+        if (!$token) $fileCache->deleteItem($tokenKey);
+
+        return $token;
     }
 
     /**
@@ -63,7 +68,7 @@ class Client
      *                          запроса указано GET или POST, в нашем случае
      *                          GET, на данный момент необходимо писать в
      *                          нижнем регистре "get".
-     * @param string $url    -  Уникальный адрес запроса, в случае со
+     * @param string $url -  Уникальный адрес запроса, в случае со
      *                          "Списком офисов" получится "/v2/deliverypoints"
      * @param array $params -   Список передаваемых параметров, в виде
      *                          ассоциативного массива.
@@ -71,11 +76,11 @@ class Client
     public function request($method, $url, $params = []) {
         $token = $this->getToken();
 
-        $rowResponse = $this->httpClient->request($method, $this->isTest ? self::BASE_TEST_URL.$url : self::BASE_URL.$url, [
+        $rowResponse = $this->httpClient->request($method, $url, [
             'headers' => [
                 'Authorization' => 'Bearer '.$token,
             ],
-            $method == 'get'? 'query' : 'json' => $params
+            $method == 'get' ? 'query' : 'json' => $params
         ]);
 
         return \json_decode($rowResponse->getBody()->getContents(), true);

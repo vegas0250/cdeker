@@ -2,17 +2,24 @@
 
 use Vegas0250\Cdeker\Client;
 
-$loader = require __DIR__ . '/vendor/autoload.php';
+require __DIR__.'/vendor/autoload.php';
 
-$cdekerClient = new Client('EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI', 'PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG', true);
+/**
+ * @param string $clientId - Это "Account" из документации
+ * @param string $clientSecret - Это "Secure password" из документации
+ * @param boolean $isTest - Выполнение в тестовой среде, подробнее в документации
+ */
+$cdekerClient = new Client(
+    'EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI',
+    'PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG',
+    true
+);
 
-#print_r($cdekerClient->getToken());
-
-/*
 $result = $cdekerClient->request('get', '/v2/deliverypoints', [
     'city_code' => 250
 ]);
-*/
+
+var_dump($result);
 
 /*
 $result = $cdekerClient->request('get', '/v2/location/cities');

@@ -1,7 +1,5 @@
 # cdeker
 
-ВНИМАНИЕ!!! Не использовать на боевых серверах, есть ошибки!
-
 Реализация http клиента php для быстрой работы с API СДЕК, реализующий  только два 
 метода.
 
@@ -18,8 +16,6 @@
 * Согласно документации Account и Secure password.
 
 ## Установка
-
-Будет доступно после публикации в репозиториях composer.
 ```console
 composer require vegas0250/cdeker
 ```
@@ -30,11 +26,13 @@ composer require vegas0250/cdeker
 <?php
 
 /**
+ * Используем данные тестовой учетной записи.
+ * 
  * @param string $clientId - Это "Account" из документации
  * @param string $clientSecret - Это "Secure password" из документации
  * @param boolean $test - Выполнение в тестовой среде, подробнее в документации 
  */
-$cdekerClient = new Client(
+$cdekerClient = new Vegas0250\Cdeker\Client(
     'EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI', 
     'PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG', 
     true
