@@ -15,7 +15,7 @@
         }
     ],
     "require": {
-        "guzzlehttp/guzzle": "7.0",
+        "guzzlehttp/guzzle": "^7.0",
         "symfony/cache": "^5.4",
         "ext-json": "*"
     }
