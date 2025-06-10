@@ -1,8 +1,6 @@
 <?php
-namespace Vegas0250\Cdeker;
 
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Contracts\Cache\ItemInterface;
+namespace Vegas0250\Cdeker;
 
 class Client
 {
