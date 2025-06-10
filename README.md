@@ -1,21 +1,10 @@
 # cdeker
 
-Минималистичный php/http клиент для работы с API v2 службы доставки СДЕК, реализующий 
-только два метода:
-
-* Получение токена;
-* Запрос к API.
+Минималистичный API клиент для службы доставки CDEK API v2.
 
 ## Как это работает
 
-Несмотря на простоту, cdeker опирается на профессиональные 
-библиотеки для работы с http запросами [guzzlehttp/guzzle](https://github.com/guzzle/guzzle), 
-и хранения токена авторизации в файловом кэше [symfony/cache](https://github.com/symfony/cache).
-
-Вся работа с запросом токена и его хранением умышленно скрыта. Если по какой-то причине
-вам необходим именно токен, вы можете получить его в ручную, вызвав метод getToken().
-
-Авторизация происходит при первом обращении к API, т.е. в нашем случае при вызове метода request().
+Убраны все зависимости, необходим только php 8.2.
 
 ## Предварительные данные для начала работы
 * Иметь под рукой целевую документацию [протокол обмена данными (v2.0) от СДЕК](https://api-docs.cdek.ru/)
@@ -30,54 +19,51 @@ composer require vegas0250/cdeker
 
 ## Использование
 
-Подключение к тестовой среде, и получение списка городов.
+Пример работы всех запросов.
 
-```php
-<?php
+Через ->get(\$url, \$params) реализуются все запросы методом 'GET'.
 
-/**
- * Используем данные тестовой учетной записи.
- * 
- * @param string $clientId - Это "Account" из документации
- * @param string $clientSecret - Это "Secure password" из документации
- * @param boolean $test - Выполнение в тестовой среде, подробнее в документации 
- */
-$cdekerClient = new Vegas0250\Cdeker\Client(
-    'EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI', 
-    'PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG', 
-    true
-);
+Через ->post(\$url, \$params) реализуются все запросы методом 'POST'.
 
-/**
- * @param string $method -  Операясь на документацию находим необходимый 
- *                          запрос, например "Список офисов", в описании 
- *                          запроса указано GET или POST, в нашем случае 
- *                          GET, на данный момент необходимо писать в 
- *                          нижнем регистре "get".
- * @param string $url    -  Уникальный адрес запроса, в случае со 
- *                          "Списком офисов" получится "/v2/deliverypoints"
- * @param array $params -   Список передаваемых параметров, в виде
- *                          ассоциативного массива. 
- */
-$result = $cdekerClient->request('get', '/v2/deliverypoints', [
-    'city_code' => 250
-]);
-
-# Выведем ответ
-print_r($result);
-```
-
-Тоже самое но в боевой среде и без комментариев:
-
+Через ->request(\$url, \$method, \$params) можно выбрать любой метод, но по умолчанию выбран 'GET', request 
+не является обязательным, и сохраняет обратную совместимость.
+ 
 ```php
 <?php
 $cdekerClient = new Vegas0250\Cdeker\Client( '<clientId>', '<clientSecret>');
 
-$cities = $cdekerClient->request('get', '/v2/deliverypoints', [
-    'city_code' => 250
-])
+$result = $cdekerClient->get('/v2/location/regions', [
+    'size' => 1
+]);
 
-foreach($cities as $city) {
-    // do something
-}
+print_r($result);
+
+$result = $cdekerClient->post('/v2/calculator/tarifflist', [
+    'from_location' => [
+        'code' => 248
+    ],
+    'to_location' => [
+        'code' => 250
+    ],
+    'packages' => [
+        'weight' => 5000
+    ]
+]);
+
+print_r($result);
+
+$result = $cdekerClient->request('/v2/calculator/tarifflist', Client::METHOD_POST, [
+    'from_location' => [
+        'code' => 248
+    ],
+    'to_location' => [
+        'code' => 250
+    ],
+    'packages' => [
+        'weight' => 5000
+    ]
+]);
+
+print_r($result);
+
 ```
