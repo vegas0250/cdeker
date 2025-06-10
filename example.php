@@ -10,9 +10,9 @@ require __DIR__.'/vendor/autoload.php';
  * @param boolean $isTest - Выполнение в тестовой среде, подробнее в документации
  */
 $cdekerClient = new Client(
-    'BTbhX9bBN9XdPXQDUrBEht0KwUc8Vg0Z',
-    'xx7Svztd8cLzzPZcEwbfBNwFkfQIhyQ8',
-    false
+    'wqGwiQx0gg8mLtiEKsUinjVSICCjtTEP',
+    'RmAmgvSgSl1yirlz9QupbzOJVqhCxcP5',
+    true
 );
 
 $result = $cdekerClient->get('/v2/location/regions', [
@@ -20,7 +20,7 @@ $result = $cdekerClient->get('/v2/location/regions', [
 ]);
 
 print_r($result);
-
+/*
 $result = $cdekerClient->post('/v2/calculator/tarifflist', [
     'from_location' => [
         'code' => 248
@@ -47,4 +47,4 @@ $result = $cdekerClient->request('/v2/calculator/tarifflist', Client::METHOD_POS
     ]
 ]);
 
-print_r($result);
+print_r($result);*/
