@@ -8,8 +8,11 @@ class Client
 {
     const BASE_URL = 'https://api.cdek.ru';
     const BASE_TEST_URL = 'https://api.edu.cdek.ru';
+    const TOKEN_FILE_NAME = 'cdeker-token.json';
 
-    private $httpClient;
+    const METHOD_GET = 'GET';
+    const METHOD_POST = 'POST';
+
     private $isTest = false;
 
     private $clientId;
@@ -24,66 +27,80 @@ class Client
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
         $this->isTest = $isTest;
+        $this->baseUrl = $this->isTest ? self::BASE_TEST_URL : self::BASE_URL;
+        $this->tokenAbsoluteFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . self::TOKEN_FILE_NAME;
+    }
 
-        $this->httpClient = new \GuzzleHttp\Client([
-            'base_uri' => $this->isTest ? self::BASE_TEST_URL : self::BASE_URL,
-            'defaults' => [
-                'headers' => [
-                    'content-type' => 'application/json'
+    public function getTokenNew() {
+        if (!file_exists($this->tokenAbsoluteFile)) {
+            $response = file_get_contents($this->baseUrl . '/v2/oauth/token', false, stream_context_create([
+                'http' => [
+                    'method' => 'POST',
+                    'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+                    'content' => http_build_query([
+                        'grant_type' => 'client_credentials',
+                        'client_id' => $this->clientId,
+                        'client_secret' => $this->clientSecret,
+                    ])
                 ]
+            ]));
+
+            if (!$response) return 0;
+
+            $tokenObject = json_decode($response, true);
+
+            $tokenObject['expires_at'] = time() + $tokenObject['expires_in'] - 60;
+
+            file_put_contents($this->tokenAbsoluteFile, json_encode($tokenObject));
+
+        } else {
+            $tokenObject = json_decode(file_get_contents($this->tokenAbsoluteFile),  true);
+        }
+
+        if ($tokenObject['expires_at'] < time()) unlink($this->tokenAbsoluteFile);
+
+        return $tokenObject['access_token'];
+    }
+
+    public function get($url, $params = []) {
+        $response = file_get_contents($this->baseUrl . $url . '?' . http_build_query($params) , false, stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => ['Authorization: Bearer '.$this->getTokenNew()],
             ]
-        ]);
+        ]));
+
+        if ($response) {
+            return json_decode($response, true);
+        }
+
+        return false;
     }
 
-    public function getToken() {
-        $fileCache = new FilesystemAdapter('cdeker');
+    public function post($url, $params = []) {
+        $response = file_get_contents($this->baseUrl . $url, false, stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => [
+                    'Authorization: Bearer '.$this->getTokenNew(),
+                    'Content-Type: application/json'
+                ],
+                'content' => json_encode($params)
+            ]
+        ]));
 
-        $tokenKey = $this->isTest ? 'token-test' : 'token';
+        if ($response) {
+            return json_decode($response, true);
+        }
 
-        $token = $fileCache->get($tokenKey, function(ItemInterface $item) {
-            $rawResponse = $this->httpClient->request('post','/v2/oauth/token', [
-                'form_params' => [
-                    'grant_type' => 'client_credentials',
-                    'client_id' => $this->clientId,
-                    'client_secret' => $this->clientSecret,
-                ]
-            ]);
-
-            $response = \json_decode($rawResponse->getBody()->getContents(), true);
-
-            $item->expiresAfter($response['expires_in']);
-            $item->set($response['access_token']);
-
-            return $response['access_token'];
-        });
-
-        if (!$token) $fileCache->deleteItem($tokenKey);
-
-        return $token;
+        return false;
     }
 
-    /**
-     * @param string $method -  Операясь на документацию находим необходимый
-     *                          запрос, например "Список офисов", в описании
-     *                          запроса указано GET или POST, в нашем случае
-     *                          GET, на данный момент необходимо писать в
-     *                          нижнем регистре "get".
-     * @param string $url -  Уникальный адрес запроса, в случае со
-     *                          "Списком офисов" получится "/v2/deliverypoints"
-     * @param array $params -   Список передаваемых параметров, в виде
-     *                          ассоциативного массива.
-     */
-    public function request($method, $url, $params = []) {
-        $token = $this->getToken();
+    public function request($url, $method = self::METHOD_GET, $params = []) {
+        if ($method == self::METHOD_POST) {
+            return $this->post($url, $params);
+        }
 
-        $rowResponse = $this->httpClient->request($method, $url, [
-            'headers' => [
-                'Authorization' => 'Bearer '.$token,
-            ],
-            $method == 'get' ? 'query' : 'json' => $params
-        ]);
-
-        return \json_decode($rowResponse->getBody()->getContents(), true);
+        return $this->get($url, $params);
     }
-
 }

@@ -5,28 +5,23 @@ use Vegas0250\Cdeker\Client;
 require __DIR__.'/vendor/autoload.php';
 
 /**
- * @param string $clientId - Это "Account" из документации
- * @param string $clientSecret - Это "Secure password" из документации
+ * @param string $clientId
+ * @param string $clientSecret
  * @param boolean $isTest - Выполнение в тестовой среде, подробнее в документации
  */
 $cdekerClient = new Client(
-    'EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI',
-    'PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG',
-    true
+    'BTbhX9bBN9XdPXQDUrBEht0KwUc8Vg0Z',
+    'xx7Svztd8cLzzPZcEwbfBNwFkfQIhyQ8',
+    false
 );
 
-$result = $cdekerClient->request('get', '/v2/deliverypoints', [
-    'city_code' => 250
+$result = $cdekerClient->get('/v2/location/regions', [
+    'size' => 1
 ]);
 
-var_dump($result);
+print_r($result);
 
-/*
-$result = $cdekerClient->request('get', '/v2/location/cities');
-*/
-
-/*
-$result = $cdekerClient->request('post', '/v2/calculator/tarifflist', [
+$result = $cdekerClient->post('/v2/calculator/tarifflist', [
     'from_location' => [
         'code' => 248
     ],
@@ -37,7 +32,19 @@ $result = $cdekerClient->request('post', '/v2/calculator/tarifflist', [
         'weight' => 5000
     ]
 ]);
-*/
 
+print_r($result);
 
-#print_r($result);
+$result = $cdekerClient->request('/v2/calculator/tarifflist', Client::METHOD_POST, [
+    'from_location' => [
+        'code' => 248
+    ],
+    'to_location' => [
+        'code' => 250
+    ],
+    'packages' => [
+        'weight' => 5000
+    ]
+]);
+
+print_r($result);
