@@ -20,7 +20,7 @@ $result = $cdekerClient->get('/v2/location/regions', [
 ]);
 
 print_r($result);
-/*
+
 $result = $cdekerClient->post('/v2/calculator/tarifflist', [
     'from_location' => [
         'code' => 248
@@ -47,4 +47,4 @@ $result = $cdekerClient->request('/v2/calculator/tarifflist', Client::METHOD_POS
     ]
 ]);
 
-print_r($result);*/
+print_r($result);

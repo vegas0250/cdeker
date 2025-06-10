@@ -32,6 +32,14 @@ composer require vegas0250/cdeker
 <?php
 $cdekerClient = new Vegas0250\Cdeker\Client( '<clientId>', '<clientSecret>');
 
+# Или тестовый аккаунт
+
+$cdekerClient = new Client(
+    'wqGwiQx0gg8mLtiEKsUinjVSICCjtTEP',
+    'RmAmgvSgSl1yirlz9QupbzOJVqhCxcP5',
+    true
+);
+
 $result = $cdekerClient->get('/v2/location/regions', [
     'size' => 1
 ]);
