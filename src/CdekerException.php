@@ -39,16 +39,31 @@ class CdekerException extends \RuntimeException
     }
 
     /**
-     * CDEK "errors" list ([['code' => ..., 'message' => ...], ...]) if present.
+     * CDEK errors ([['code' => ..., 'message' => ...], ...]): top-level "errors"
+     * plus "requests[].errors" (orders, intakes, webhooks).
      *
      * @return array
      */
     public function getErrors()
     {
-        if (is_array($this->responseBody) && isset($this->responseBody['errors']) && is_array($this->responseBody['errors'])) {
-            return $this->responseBody['errors'];
+        $errors = [];
+
+        if (!is_array($this->responseBody)) {
+            return $errors;
         }
 
-        return [];
+        if (isset($this->responseBody['errors']) && is_array($this->responseBody['errors'])) {
+            $errors = $this->responseBody['errors'];
+        }
+
+        if (isset($this->responseBody['requests']) && is_array($this->responseBody['requests'])) {
+            foreach ($this->responseBody['requests'] as $request) {
+                if (isset($request['errors']) && is_array($request['errors'])) {
+                    $errors = array_merge($errors, $request['errors']);
+                }
+            }
+        }
+
+        return $errors;
     }
 }

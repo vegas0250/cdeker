@@ -10,6 +10,8 @@ class Client
 
     const METHOD_GET = 'GET';
     const METHOD_POST = 'POST';
+    const METHOD_PATCH = 'PATCH';
+    const METHOD_DELETE = 'DELETE';
 
     private $isTest = false;
 
@@ -78,14 +80,43 @@ class Client
 
     /**
      * @param string $url
-     * @param string $method
+     * @param array $params JSON body
+     * @return array|string
+     * @throws CdekerException
+     */
+    public function patch($url, $params = []) {
+        return $this->authorizedRequest(self::METHOD_PATCH, $url, json_encode($params));
+    }
+
+    /**
+     * @param string $url
+     * @param array $params Query string
+     * @return array|string
+     * @throws CdekerException
+     */
+    public function delete($url, $params = []) {
+        if (!empty($params)) {
+            $url .= '?' . http_build_query($params);
+        }
+
+        return $this->authorizedRequest(self::METHOD_DELETE, $url, null);
+    }
+
+    /**
+     * @param string $url
+     * @param string $method METHOD_GET | METHOD_POST | METHOD_PATCH | METHOD_DELETE
      * @param array $params
-     * @return array
+     * @return array|string
      * @throws CdekerException
      */
     public function request($url, $method = self::METHOD_GET, $params = []) {
-        if ($method == self::METHOD_POST) {
-            return $this->post($url, $params);
+        switch (strtoupper($method)) {
+            case self::METHOD_POST:
+                return $this->post($url, $params);
+            case self::METHOD_PATCH:
+                return $this->patch($url, $params);
+            case self::METHOD_DELETE:
+                return $this->delete($url, $params);
         }
 
         return $this->get($url, $params);
@@ -184,7 +215,7 @@ class Client
      * @param string $url Путь относительно baseUrl
      * @param string[] $headers
      * @param string|null $content
-     * @return array Декодированный ответ ([] для пустого тела)
+     * @return array|string Декодированный JSON ([] для пустого тела) или сырое тело для не-JSON (PDF и т.п.)
      * @throws CdekerException
      */
     private function send($method, $url, $headers, $content) {
@@ -207,13 +238,23 @@ class Client
         }
 
         $statusCode = 0;
+        $contentType = '';
         if (isset($http_response_header) && is_array($http_response_header)) {
             // Последняя строка статуса (после возможных редиректов)
             foreach ($http_response_header as $line) {
                 if (preg_match('#^HTTP/\S+\s+(\d{3})#', $line, $m)) {
                     $statusCode = (int)$m[1];
+                    $contentType = '';
+                } elseif (stripos($line, 'Content-Type:') === 0) {
+                    $contentType = strtolower(trim(substr($line, 13)));
                 }
             }
+        }
+
+        // Не-JSON успешный ответ (PDF квитанций, ШК и т.п.) возвращается как есть
+        if ($statusCode >= 200 && $statusCode < 300 && $response !== ''
+            && $contentType !== '' && strpos($contentType, 'json') === false) {
+            return $response;
         }
 
         $body = $response === '' ? [] : json_decode($response, true);
