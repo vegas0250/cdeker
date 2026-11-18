@@ -1,6 +1,8 @@
 {
     "name": "vegas0250/cdeker",
-    "description": "API client for cdek",
+    "description": "Minimal PHP client for the CDEK delivery API v2. Zero dependencies, PHP 5.6+.",
+    "keywords": ["cdek", "sdek", "сдэк", "delivery", "shipping", "api", "client"],
+    "homepage": "https://github.com/vegas0250/cdeker",
     "type": "library",
     "license": "MIT",
     "autoload": {
