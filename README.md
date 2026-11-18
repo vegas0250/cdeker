@@ -28,6 +28,22 @@ composer require vegas0250/cdeker
 Через ->request(\$url, \$method, \$params) можно выбрать любой метод, но по умолчанию выбран 'GET', request 
 не является обязательным, и сохраняет обратную совместимость.
  
+Ответ возвращается массивом (декодированный JSON). При ошибке HTTP (4xx/5xx), сетевой ошибке или
+неудачном получении токена выбрасывается `Vegas0250\Cdeker\CdekerException`
+(`getStatusCode()`, `getResponseBody()`, `getErrors()` — список `errors` от СДЕК).
+Токен кэшируется в `sys_get_temp_dir()` отдельно для каждой пары «среда + аккаунт»;
+при 401 токен обновляется и запрос повторяется один раз.
+
+```php
+<?php
+try {
+    $result = $cdekerClient->post('/v2/orders', $order);
+} catch (Vegas0250\Cdeker\CdekerException $e) {
+    echo $e->getStatusCode();
+    print_r($e->getErrors());
+}
+```
+
 ```php
 <?php
 $cdekerClient = new Vegas0250\Cdeker\Client( '<clientId>', '<clientSecret>');
